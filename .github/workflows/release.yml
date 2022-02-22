@@ -141,7 +141,7 @@ jobs:
         if: matrix.build == 'linux' || matrix.build == 'macos'
         run: |
           ls target
-          strip target/${{ matrix.target }}/release/phpup
+          strip target/${{ matrix.target }}/release/github-action-test
 
       - name: Strip release binary (arm)
         if: matrix.build == 'linux-arm'
@@ -150,20 +150,20 @@ jobs:
             "$PWD/target:/target:Z" \
             rustembedded/cross:arm-unknown-linux-gnueabihf \
             arm-linux-gnueabihf-strip \
-            /target/arm-unknown-linux-gnueabihf/release/phpup
+            /target/arm-unknown-linux-gnueabihf/release/github-action-test
 
       - name: Build archive
         shell: bash
         run: |
-          staging="phpup-${{ env.RELEASE_VERSION }}-${{ matrix.target }}"
+          staging="github-action-test-${{ env.RELEASE_VERSION }}-${{ matrix.target }}"
           mkdir -p "$staging"/{complete,doc}
           cp {README.md,LICENSE} "$staging/"
           if [ "${{ matrix.os }}" = "windows-2019" ]; then
-            cp "target/${{ matrix.target }}/release/phpup.exe" "$staging/"
+            cp "target/${{ matrix.target }}/release/github-action-test.exe" "$staging/"
             7z a "$staging.zip" "$staging"
             echo "ASSET=$staging.zip" >> $GITHUB_ENV
           else
-            cp "target/${{ matrix.target }}/release/phpup" "$staging/"
+            cp "target/${{ matrix.target }}/release/github-action-test" "$staging/"
             tar czf "$staging.tar.gz" "$staging"
             echo "ASSET=$staging.tar.gz" >> $GITHUB_ENV
           fi
