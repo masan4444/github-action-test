@@ -172,6 +172,7 @@ jobs:
         shell: bash
         run: |
           staging="github-action-test-${{ env.RELEASE_VERSION }}-${{ matrix.build }}"
+          mkdir "$staging"
           cp {README.md,LICENSE} "$staging/"
           cp "target/${{ matrix.target }}/release/github-action-test" "$staging/"
           zip -r "$staging.zip" "$staging"
