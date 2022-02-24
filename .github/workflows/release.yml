@@ -151,7 +151,7 @@ jobs:
           echo "release version: $RELEASE_VERSION"
 
       - name: Build release binary
-        run: RUSTFLAGS=${{ env.RUSTFLAGS }} ${{ env.CARGO }} build ${{ env.TARGET_FLAGS }} --verbose --release
+        run: RUSTFLAGS="${{ env.RUSTFLAGS }}" ${{ env.CARGO }} build ${{ env.TARGET_FLAGS }} --verbose --release
 
       # - name: Strip release binary (Linux and macOS)
       #   if: matrix.build == 'Linux' || matrix.build == 'macOS'
