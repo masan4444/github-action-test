@@ -124,6 +124,7 @@ jobs:
         run: |
           cargo install cross
           echo "CARGO=cross" >> $GITHUB_ENV
+          echo "RUSTFLAGS=-C strip=symbols" >> $GITHUB_ENV
           echo "TARGET_FLAGS=--target ${{ matrix.target }}" >> $GITHUB_ENV
           echo "TARGET_DIR=./target/${{ matrix.target }}" >> $GITHUB_ENV
 
@@ -150,7 +151,7 @@ jobs:
           echo "release version: $RELEASE_VERSION"
 
       - name: Build release binary
-        run: RUSTFLAGS="-C strip=symbols" ${{ env.CARGO }} build ${{ env.TARGET_FLAGS }} --verbose --release
+        run: RUSTFLAGS=${{ env.RUSTFLAGS }} ${{ env.CARGO }} build ${{ env.TARGET_FLAGS }} --verbose --release
 
       # - name: Strip release binary (Linux and macOS)
       #   if: matrix.build == 'Linux' || matrix.build == 'macOS'
@@ -171,11 +172,10 @@ jobs:
         shell: bash
         run: |
           staging="github-action-test-${{ env.RELEASE_VERSION }}-${{ matrix.build }}"
-          mkdir -p "$staging"/{complete,doc}
           cp {README.md,LICENSE} "$staging/"
           cp "target/${{ matrix.target }}/release/github-action-test" "$staging/"
           zip -r "$staging.zip" "$staging"
-          echo "ASSET=$staging.tar.gz" >> $GITHUB_ENV
+          echo "ASSET=$staging.zip" >> $GITHUB_ENV
 
       - name: Upload release archive
         uses: actions/upload-release-asset@v1.0.1
