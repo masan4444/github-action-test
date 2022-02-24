@@ -67,14 +67,13 @@ jobs:
       #
       RUSTFLAGS: -C strip=symbols
       # When CARGO is set to CROSS, this is set to `--target matrix.target`.
-      TARGET_FLAGS:
+      TARGET_FLAGS: --target ${{ matrix.target }}
       # When CARGO is set to CROSS, TARGET_DIR includes matrix.target.
-      TARGET_DIR: ./target
+      TARGET_DIR: ./target/${{ matrix.target }}
       # Emit backtraces on panics.
       RUST_BACKTRACE: 1
     strategy:
       matrix:
-        # build: [linux, linux-arm, macos]
         # build: [Linux, Linux-armv7, Linux-aarch64, macOS, macOS-aarch64]
         build: [linux, linux-armv7, linux-aarch64, macos]
         include:
@@ -121,11 +120,6 @@ jobs:
           profile: minimal
           override: true
           target: ${{ matrix.target }}
-
-      - name: Set env
-        run: |
-          echo "TARGET_FLAGS=--target ${{ matrix.target }}" >> $GITHUB_ENV
-          echo "TARGET_DIR=./target/${{ matrix.target }}" >> $GITHUB_ENV
 
       - name: Use Cross
         if: matrix.build == 'linux-armv7' || matrix.build == 'linux-aarch64'
