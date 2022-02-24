@@ -158,9 +158,9 @@ jobs:
         run: |
           docker run --rm -v \
             "$PWD/target:/target:Z" \
-            rustembedded/cross:${{ env.target }} \
+            rustembedded/cross:${{ matrix.target }} \
             arm-linux-gnueabihf-strip \
-            /target/${{ env.target }}/release/github-action-test
+            /target/${{ matrix.target }}/release/github-action-test
 
       - name: Build archive
         shell: bash
