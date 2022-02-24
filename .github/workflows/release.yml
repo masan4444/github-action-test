@@ -72,20 +72,30 @@ jobs:
       RUST_BACKTRACE: 1
     strategy:
       matrix:
-        build: [linux, linux-arm, macos]
+        # build: [linux, linux-arm, macos]
+        # build: [Linux, Linux-armv7, Linux-aarch64, macOS, macOS-aarch64]
+        build: [Linux, Linux-armv7, Linux-aarch64, macOS]
         include:
-          - build: linux
+          - build: Linux
             os: ubuntu-18.04
             rust: stable
             target: x86_64-unknown-linux-musl
-          - build: linux-arm
+          - build: Linux-armv7
             os: ubuntu-18.04
             rust: stable
-            target: arm-unknown-linux-gnueabihf
-          - build: macos
-            os: macos-latest
+            target: armv7-unknown-linux-gnueabihf
+          - build: Linux-aarch64
+            os: ubuntu-18.04
+            rust: stable
+            target: aarch64-unknown-linux-musl
+          - build: macOS
+            os: macOS-latest
             rust: stable
             target: x86_64-apple-darwin
+          # - build: macOS-aarch64
+          #   os: macOS-latest
+          #   rust: stable
+          #   target: aarch64-apple-darwin
 
     steps:
       - name: Checkout repository
@@ -135,27 +145,27 @@ jobs:
           echo "release version: $RELEASE_VERSION"
 
       - name: Build release binary
-        run: ${{ env.CARGO }} build ${{ env.TARGET_FLAGS }} --verbose --release
+        run: RUSTFLAGS="-C strip=symbols" ${{ env.CARGO }} build ${{ env.TARGET_FLAGS }} --verbose --release
 
-      - name: Strip release binary (linux and macos)
-        if: matrix.build == 'linux' || matrix.build == 'macos'
-        run: |
-          ls target
-          strip target/${{ matrix.target }}/release/github-action-test
+      # - name: Strip release binary (Linux and macOS)
+      #   if: matrix.build == 'Linux' || matrix.build == 'macOS'
+      #   run: |
+      #     ls target
+      #     strip target/${{ matrix.target }}/release/github-action-test
 
       - name: Strip release binary (arm)
-        if: matrix.build == 'linux-arm'
+        if: matrix.build == 'Linux-armv7' || matrix.build == 'Linux-aarch64'
         run: |
           docker run --rm -v \
             "$PWD/target:/target:Z" \
-            rustembedded/cross:arm-unknown-linux-gnueabihf \
+            rustembedded/cross:${{ env.target }} \
             arm-linux-gnueabihf-strip \
-            /target/arm-unknown-linux-gnueabihf/release/github-action-test
+            /target/${{ env.target }}/release/github-action-test
 
       - name: Build archive
         shell: bash
         run: |
-          staging="github-action-test-${{ env.RELEASE_VERSION }}-${{ matrix.target }}"
+          staging="github-action-test-${{ env.RELEASE_VERSION }}-${{ matrix.build }}"
           mkdir -p "$staging"/{complete,doc}
           cp {README.md,LICENSE} "$staging/"
           if [ "${{ matrix.os }}" = "windows-2019" ]; then
