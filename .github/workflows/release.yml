@@ -74,7 +74,7 @@ jobs:
       matrix:
         # build: [linux, linux-arm, macos]
         # build: [Linux, Linux-armv7, Linux-aarch64, macOS, macOS-aarch64]
-        build: [linux, linux-armv7, linux-aarch64, macOS]
+        build: [linux, linux-armv7, linux-aarch64, macos]
         include:
           - build: linux
             os: ubuntu-18.04
@@ -90,8 +90,8 @@ jobs:
             os: ubuntu-18.04
             rust: stable
             target: aarch64-unknown-linux-musl
-            strip: aarch64-linux-gnueabihf-strip
-          - build: macOS
+            strip: aarch64-linux-musl-strip
+          - build: macos
             os: macOS-latest
             rust: stable
             target: x86_64-apple-darwin
@@ -154,9 +154,8 @@ jobs:
         run: RUSTFLAGS="${{ env.RUSTFLAGS }}" ${{ env.CARGO }} build ${{ env.TARGET_FLAGS }} --verbose --release
 
       # - name: Strip release binary (Linux and macOS)
-      #   if: matrix.build == 'Linux' || matrix.build == 'macOS'
+      #   if: matrix.build == 'linux' || matrix.build == 'macos'
       #   run: |
-      #     ls target
       #     strip target/${{ matrix.target }}/release/github-action-test
 
       - name: Strip release binary (arm)
