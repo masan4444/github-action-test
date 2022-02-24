@@ -64,6 +64,8 @@ jobs:
       # For some builds, we use cross to test on 32-bit and big-endian
       # systems.
       CARGO: cargo
+      #
+      RUSTFLAGS: -C strip=symbols
       # When CARGO is set to CROSS, this is set to `--target matrix.target`.
       TARGET_FLAGS:
       # When CARGO is set to CROSS, TARGET_DIR includes matrix.target.
@@ -120,19 +122,16 @@ jobs:
           override: true
           target: ${{ matrix.target }}
 
-      - name: Use Cross
+      - name: Set env
         run: |
-          cargo install cross
-          echo "CARGO=cross" >> $GITHUB_ENV
-          echo "RUSTFLAGS=-C strip=symbols" >> $GITHUB_ENV
           echo "TARGET_FLAGS=--target ${{ matrix.target }}" >> $GITHUB_ENV
           echo "TARGET_DIR=./target/${{ matrix.target }}" >> $GITHUB_ENV
 
-      - name: Show command used for Cargo
+      - name: Use Cross
+        if: matrix.build == 'linux-armv7' || matrix.build == 'linux-aarch64'
         run: |
-          echo "cargo command is: ${{ env.CARGO }}"
-          echo "target flag is: ${{ env.TARGET_FLAGS }}"
-          echo "target dir is: ${{ env.TARGET_DIR }}"
+          cargo install cross
+          echo "CARGO=cross" >> $GITHUB_ENV
 
       - name: Get release download URL
         uses: actions/download-artifact@v1
@@ -152,11 +151,6 @@ jobs:
 
       - name: Build release binary
         run: RUSTFLAGS="${{ env.RUSTFLAGS }}" ${{ env.CARGO }} build ${{ env.TARGET_FLAGS }} --verbose --release
-
-      # - name: Strip release binary (Linux and macOS)
-      #   if: matrix.build == 'linux' || matrix.build == 'macos'
-      #   run: |
-      #     strip target/${{ matrix.target }}/release/github-action-test
 
       - name: Strip release binary (arm)
         if: matrix.build == 'linux-armv7' || matrix.build == 'linux-aarch64'
